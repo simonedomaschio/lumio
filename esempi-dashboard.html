@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Lumio — Esempi di analisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --bg:#F5F7FA; --surface:#fff; --border:#E3E8EF; --border2:#C8D0DC;
+  --ink:#0D1117; --ink7:#1C2536; --ink5:#4A5568; --ink4:#718096; --ink3:#A0AEC0; --ink2:#CBD5E0; --ink1:#EDF2F7;
+  --mint:#0DB27A; --mint-d:#098A5E; --mint-l:#E5F7F1; --mint-m:#A8E6D0;
+  --amber:#D97706; --amber-l:#FEF3C7;
+  --red:#DC2626; --red-l:#FEE2E2;
+  --blue:#2563EB; --blue-l:#EFF6FF;
+  --purple:#7C3AED; --purple-l:#F5F3FF; --purple-d:#6D28D9;
+  --sh:0 1px 3px rgba(13,17,23,.05),0 4px 12px rgba(13,17,23,.04);
+  --sh2:0 8px 24px rgba(13,17,23,.1);
+}
+html,body { font-family:'DM Sans',system-ui,sans-serif; background:var(--bg); color:var(--ink);
+  -webkit-font-smoothing:antialiased; line-height:1.55; }
+.mono { font-family:'DM Mono',ui-monospace,monospace; }
+a { color:inherit; text-decoration:none; }
+button { font-family:inherit; cursor:pointer; border:none; background:none; }
+::selection { background:var(--mint); color:#fff; }
+@keyframes fu { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+.fu { animation:fu .45s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes grow { from { transform:scaleY(0); } to { transform:scaleY(1); } }
+.grow { transform-origin:bottom; animation:grow .8s cubic-bezier(.2,.7,.2,1) both; }
+
+/* toolbar */
+.tb { position:sticky; top:0; z-index:50; background:rgba(13,17,23,.95); backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.08); color:#fff; }
+.tb-in { max-width:1080px; margin:0 auto; padding:13px 22px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.tb-l { display:flex; align-items:center; gap:11px; }
+.logo { display:flex; align-items:center; gap:9px; }
+.logo-sun { width:26px; height:26px; }
+.logo-name { font-size:18px; font-weight:800; letter-spacing:-.03em; }
+.tb-tag { font-size:11px; color:var(--ink3); padding-left:11px; margin-left:3px; border-left:1px solid rgba(255,255,255,.15); }
+@media(max-width:600px){ .tb-tag{ display:none; } }
+.btn { display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:700; padding:9px 17px; border-radius:10px; transition:all .15s; }
+.btn-mint { background:var(--mint); color:#fff; } .btn-mint:hover { background:var(--mint-d); }
+.btn-od { color:#fff; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.25); } .btn-od:hover { background:rgba(255,255,255,.08); }
+
+/* page intro */
+.intro { max-width:1080px; margin:0 auto; padding:40px 22px 8px; }
+.intro .eyebrow { display:inline-flex; align-items:center; gap:9px; font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.12em; color:var(--mint-d); margin-bottom:14px; }
+.intro .eyebrow::before { content:''; width:22px; height:2px; border-radius:2px; background:var(--mint-m); }
+.intro h1 { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-.03em; line-height:1.1; }
+.intro p { margin-top:14px; font-size:16px; color:var(--ink5); max-width:620px; line-height:1.6; }
+.intro .files { margin-top:18px; display:flex; flex-wrap:wrap; gap:8px; }
+.fchip { display:inline-flex; align-items:center; gap:7px; background:#fff; border:1px solid var(--border);
+  border-radius:10px; padding:7px 12px; font-size:12.5px; font-weight:600; color:var(--ink5); box-shadow:var(--sh); }
+
+/* tabs */
+.tabs { max-width:1080px; margin:0 auto; padding:24px 22px 0; display:flex; gap:8px; flex-wrap:wrap; }
+.tab { padding:10px 18px; border-radius:11px; border:1.5px solid var(--border); background:#fff;
+  font-size:13px; font-weight:700; color:var(--ink4); transition:all .15s; display:inline-flex; align-items:center; gap:7px; }
+.tab:hover { border-color:var(--mint); color:var(--mint); }
+.tab.act { border-color:var(--ink); background:var(--ink); color:#fff; }
+.tab[data-k="svp"].act { border-color:var(--mint); background:var(--mint); }
+.tab[data-k="pay"].act { border-color:var(--red); background:var(--red); }
+.tab[data-k="prod"].act { border-color:var(--purple); background:var(--purple); }
+
+/* panel */
+.panel-wrap { max-width:1080px; margin:0 auto; padding:22px 22px 80px; }
+.view { display:none; } .view.on { display:block; }
+
+/* cards & grids */
+.card { background:#fff; border:1px solid var(--border); border-radius:16px; padding:20px; box-shadow:var(--sh); }
+.ct { font-size:14px; font-weight:800; display:flex; align-items:center; gap:8px; }
+.cs { font-size:12px; color:var(--ink4); margin-top:2px; margin-bottom:14px; }
+.grid { display:grid; gap:14px; }
+.g2 { grid-template-columns:1fr 1fr; } .g3 { grid-template-columns:repeat(3,1fr); } .g4 { grid-template-columns:repeat(4,1fr); }
+@media(max-width:820px){ .g4 { grid-template-columns:1fr 1fr; } .g3 { grid-template-columns:1fr; } .g2 { grid-template-columns:1fr; } }
+.vhead { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:20px; }
+.vhead h2 { font-size:22px; font-weight:800; letter-spacing:-.02em; }
+.vhead p { font-size:13px; color:var(--ink4); margin-top:3px; }
+
+/* health */
+.health { background:var(--ink); color:#fff; border-radius:18px; padding:24px; display:grid;
+  grid-template-columns:auto 1fr; gap:24px; align-items:center; margin-bottom:14px; }
+@media(max-width:600px){ .health { grid-template-columns:1fr; } }
+.ring { width:110px; height:110px; position:relative; }
+.ring .c { position:absolute; inset:0; display:grid; place-items:center; text-align:center; }
+.ring .c .n { font-size:32px; font-weight:800; letter-spacing:-.02em; }
+.ring .c .o { font-size:11px; color:var(--ink3); }
+.health .v { font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mint-m); }
+.health h3 { font-size:18px; font-weight:800; margin-top:4px; }
+.health .dims { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:16px; }
+@media(max-width:600px){ .health .dims { grid-template-columns:1fr 1fr; } }
+.dim .l { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink3); }
+.dim .bar { height:5px; border-radius:100px; background:rgba(255,255,255,.12); margin-top:6px; overflow:hidden; }
+.dim .bar > span { display:block; height:100%; border-radius:100px; background:var(--mint-m); }
+.dim .bar > span.wn { background:var(--amber); }
+.dim .vv { font-size:12px; font-weight:700; margin-top:5px; }
+
+/* KPI */
+.kpi { background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:var(--sh); }
+.kpi .l { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--ink4); }
+.kpi .v { font-size:24px; font-weight:800; letter-spacing:-.02em; margin-top:5px; }
+.kpi .t { display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:700; padding:2px 8px; border-radius:100px; margin-top:6px; }
+.kpi .t.up { background:var(--mint-l); color:var(--mint-d); }
+.kpi .t.dn { background:var(--red-l); color:var(--red); }
+.kpi .t.wn { background:var(--amber-l); color:var(--amber); }
+.kpi .t.nu { background:var(--ink1); color:var(--ink5); }
+
+/* bars chart */
+.bars { height:200px; display:flex; align-items:flex-end; gap:10px; padding-top:10px; }
+.bars .col { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
+.bars .pair { width:100%; height:100%; display:flex; align-items:flex-end; justify-content:center; gap:3px; }
+.bars .pair > span { width:42%; border-radius:4px 4px 0 0; }
+.bars .s { background:var(--mint); } .bars .p { background:#FCA5A5; }
+.bars .x { font-size:10px; font-weight:600; color:var(--ink4); }
+.legend { display:flex; gap:16px; margin-top:14px; font-size:11.5px; color:var(--ink5); }
+.legend span { display:inline-flex; align-items:center; gap:6px; }
+.legend i { width:12px; height:12px; border-radius:3px; display:inline-block; }
+
+/* margin bars (single) */
+.mbars { height:130px; display:flex; align-items:flex-end; gap:8px; padding-top:8px; }
+.mbars .col { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; height:100%; justify-content:flex-end; }
+.mbars .col > span { width:60%; border-radius:4px 4px 0 0; background:var(--mint); }
+.mbars .x { font-size:10px; color:var(--ink4); }
+
+/* ranked list */
+.tlist { display:flex; flex-direction:column; gap:11px; }
+.ti { display:flex; align-items:center; gap:10px; }
+.trk { font-family:'DM Mono',monospace; font-size:11px; color:var(--ink3); width:16px; text-align:right; flex-shrink:0; }
+.tw { flex:1; min-width:0; }
+.tn { font-size:12.5px; font-weight:600; color:var(--ink7); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tb-bar { height:7px; background:var(--ink1); border-radius:100px; overflow:hidden; }
+.tb-bar > span { display:block; height:100%; border-radius:100px; }
+.tv { font-family:'DM Mono',monospace; font-size:12px; color:var(--ink5); flex-shrink:0; }
+
+/* anomalies / list rows */
+.alist { display:flex; flex-direction:column; gap:9px; }
+.al { display:flex; gap:11px; align-items:flex-start; border-radius:12px; padding:12px 14px; font-size:13px; line-height:1.5; }
+.al.cr { background:var(--red-l); } .al.wa { background:var(--amber-l); } .al.ok { background:var(--mint-l); }
+.al .ic { font-size:15px; flex-shrink:0; }
+.al b { font-weight:700; }
+
+/* aging row */
+.aging { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+@media(max-width:700px){ .aging { grid-template-columns:1fr 1fr; } }
+.ag { border-radius:13px; padding:15px; border:1px solid var(--border); }
+.ag.now { background:var(--mint-l); border-color:var(--mint-m); }
+.ag.soon { background:var(--blue-l); border-color:#BFDBFE; }
+.ag.late { background:var(--amber-l); border-color:#FDE68A; }
+.ag.crit { background:var(--red-l); border-color:#FECACA; }
+.ag .l { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+.ag.now .l { color:var(--mint-d); } .ag.soon .l { color:var(--blue); } .ag.late .l { color:var(--amber); } .ag.crit .l { color:var(--red); }
+.ag .v { font-size:21px; font-weight:800; letter-spacing:-.02em; margin-top:5px; color:var(--ink); }
+.ag .s { font-size:11px; color:var(--ink4); margin-top:2px; }
+
+/* table */
+.tbl { width:100%; border-collapse:collapse; font-size:13px; }
+.tbl th { text-align:left; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--ink4); padding:9px 10px; border-bottom:1px solid var(--border); }
+.tbl td { padding:11px 10px; border-bottom:1px solid var(--border); }
+.tbl tr:last-child td { border-bottom:none; }
+.tbl .r { text-align:right; font-family:'DM Mono',monospace; }
+.pill { display:inline-flex; font-size:10px; font-weight:700; padding:3px 8px; border-radius:100px; text-transform:uppercase; letter-spacing:.04em; }
+.pill.ok { background:var(--mint-l); color:var(--mint-d); }
+.pill.late { background:var(--red-l); color:var(--red); }
+.pill.soon { background:var(--amber-l); color:var(--amber); }
+
+/* product price */
+.prod { border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:var(--sh); }
+.prod-h { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+.prod-n { font-size:14px; font-weight:800; }
+.prod-trend { font-size:11px; font-weight:700; padding:3px 9px; border-radius:100px; }
+.prod-trend.up { background:var(--red-l); color:var(--red); }
+.prod-trend.dn { background:var(--mint-l); color:var(--mint-d); }
+.prod-trend.fl { background:var(--ink1); color:var(--ink5); }
+.spark { height:54px; display:flex; align-items:flex-end; gap:5px; }
+.spark > span { flex:1; border-radius:3px 3px 0 0; background:var(--purple); opacity:.35; }
+.spark > span:last-child { opacity:1; }
+.prod-foot { display:flex; justify-content:space-between; margin-top:12px; font-size:12px; }
+.prod-foot .a { color:var(--ink4); } .prod-foot .b { font-family:'DM Mono',monospace; font-weight:600; }
+
+/* report box */
+.rbox { background:var(--ink); border-radius:16px; padding:20px; margin-top:14px; }
+.rt { font-size:13px; font-weight:800; color:#fff; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.rx { font-family:'DM Mono',monospace; font-size:12px; line-height:1.7; color:var(--ink2); white-space:pre-wrap;
+  background:rgba(0,0,0,.25); border-radius:10px; padding:16px; overflow-x:auto; }
+
+/* note */
+.note { display:flex; gap:14px; align-items:flex-start; background:var(--purple-l); border-radius:14px; padding:16px 18px; margin-top:14px; }
+.note .ic { font-size:18px; }
+.note b { font-weight:700; }
+.note p { font-size:13.5px; color:var(--ink7); line-height:1.6; }
+
+.foot { max-width:1080px; margin:0 auto; padding:0 22px 50px; text-align:center; }
+.foot a { color:var(--mint-d); font-weight:700; }
+</style>
+</head>
+<body>
+
+<!-- toolbar -->
+<div class="tb">
+  <div class="tb-in">
+    <div class="tb-l">
+      <a class="logo" href="index.html" style="color:#fff">
+        <svg class="logo-sun" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="6" fill="#0DB27A"/><line x1="15" y1="2" x2="15" y2="5.5" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="15" y1="24.5" x2="15" y2="28" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="15" x2="5.5" y2="15" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="24.5" y1="15" x2="28" y2="15" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="5.64" y1="5.64" x2="8.18" y2="8.18" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/><line x1="21.82" y1="21.82" x2="24.36" y2="24.36" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/><line x1="24.36" y1="5.64" x2="21.82" y2="8.18" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/><line x1="8.18" y1="21.82" x2="5.64" y2="24.36" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="logo-name">Lumio</span>
+      </a>
+      <span class="tb-tag">Esempi di analisi · cosa esce dalla dashboard</span>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <a class="btn btn-od" href="index.html">← Torna al sito</a>
+      <a class="btn btn-mint" href="index.html#prezzi">Richiedi la tua analisi →</a>
+    </div>
+  </div>
+</div>
+
+<!-- intro -->
+<div class="intro">
+  <div class="eyebrow">Esempio reale</div>
+  <h1>Cosa ottieni dopo aver caricato i tuoi file</h1>
+  <p>Questo è il risultato di un'analisi Lumio a partire da 3 file di una PMI commerciale. Cambia scheda per vedere le quattro viste: panoramica, vendite vs acquisti, scadenzario e andamento prezzi.</p>
+  <div class="files">
+    <span class="fchip">🛒 vendite_2025.xlsx · 3.812 righe</span>
+    <span class="fchip">📦 acquisti_2025.xlsx · 1.247 righe</span>
+    <span class="fchip">💳 scadenze.csv · 486 righe</span>
+  </div>
+</div>
+
+<!-- tabs -->
+<div class="tabs" id="tabs">
+  <button class="tab act" data-k="over">☀️ Panoramica</button>
+  <button class="tab" data-k="svp">📊 Vendite vs Acquisti</button>
+  <button class="tab" data-k="pay">💳 Scadenzario</button>
+  <button class="tab" data-k="prod">📦 Andamento prezzi</button>
+</div>
+
+<div class="panel-wrap">
+
+  <!-- ══════ PANORAMICA ══════ -->
+  <div class="view on" data-v="over">
+    <div class="vhead">
+      <div><h2>☀️ Panoramica aziendale</h2><p>Riepilogo aggregato dei 3 file caricati · al 31/12/2025</p></div>
+    </div>
+
+    <div class="health fu">
+      <div class="ring">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="47" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/>
+          <circle cx="55" cy="55" r="47" fill="none" stroke="#0DB27A" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="295" stroke-dashoffset="65" transform="rotate(-90 55 55)"/>
+        </svg>
+        <div class="c"><div><div class="n">78</div><div class="o">/100</div></div></div>
+      </div>
+      <div>
+        <div class="v">Salute aziendale · Buona</div>
+        <h3>Azienda solida, con due aree da presidiare</h3>
+        <div class="dims">
+          <div class="dim"><div class="l">Redditività</div><div class="bar"><span style="width:86%"></span></div><div class="vv" style="color:var(--mint-m)">86 · ottima</div></div>
+          <div class="dim"><div class="l">Liquidità</div><div class="bar"><span class="wn" style="width:61%"></span></div><div class="vv" style="color:#FCD34D">61 · da seguire</div></div>
+          <div class="dim"><div class="l">Crescita</div><div class="bar"><span style="width:82%"></span></div><div class="vv" style="color:var(--mint-m)">82 · forte</div></div>
+          <div class="dim"><div class="l">Clienti</div><div class="bar"><span class="wn" style="width:64%"></span></div><div class="vv" style="color:#FCD34D">64 · concentrati</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g4 fu" style="margin-bottom:14px">
+      <div class="kpi"><div class="l">Fatturato</div><div class="v">€ 487.213</div><span class="t up">▲ +12,4%</span></div>
+      <div class="kpi"><div class="l">Acquisti + costi</div><div class="v">€ 291.858</div><span class="t wn">▲ +8,1%</span></div>
+      <div class="kpi"><div class="l">Margine lordo</div><div class="v">€ 195.355</div><span class="t up">40,1%</span></div>
+      <div class="kpi"><div class="l">Crediti aperti</div><div class="v">€ 134.500</div><span class="t dn">▼ 18 in ritardo</span></div>
+    </div>
+
+    <div class="grid g2 fu">
+      <div class="card">
+        <div class="ct">🏆 Top clienti</div><div class="cs">Per fatturato · 62% concentrato sui primi 5</div>
+        <div class="tlist">
+          <div class="ti"><span class="trk">1</span><div class="tw"><div class="tn">Officine Verdi S.p.A.</div><div class="tb-bar"><span style="width:100%;background:#0DB27A"></span></div></div><span class="tv">€ 107k</span></div>
+          <div class="ti"><span class="trk">2</span><div class="tw"><div class="tn">Logistica Ponte S.r.l.</div><div class="tb-bar"><span style="width:73%;background:#0DB27A"></span></div></div><span class="tv">€ 78k</span></div>
+          <div class="ti"><span class="trk">3</span><div class="tw"><div class="tn">Centro Sud Distribuzione</div><div class="tb-bar"><span style="width:50%;background:#0DB27A"></span></div></div><span class="tv">€ 53k</span></div>
+          <div class="ti"><span class="trk">4</span><div class="tw"><div class="tn">EdilNord Coop.</div><div class="tb-bar"><span style="width:36%;background:#0DB27A"></span></div></div><span class="tv">€ 39k</span></div>
+          <div class="ti"><span class="trk">5</span><div class="tw"><div class="tn">Studio Marchetti &amp; C.</div><div class="tb-bar"><span style="width:22%;background:#0DB27A"></span></div></div><span class="tv">€ 24k</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">⚠️ Anomalie rilevate</div><div class="cs">Segnalazioni automatiche dai tuoi dati</div>
+        <div class="alist">
+          <div class="al cr"><span class="ic">🔴</span><div><b>Liquidità sotto soglia.</b> Crediti aperti (€134k) ma liquidità stimata €92k contro €98k di debiti a breve.</div></div>
+          <div class="al wa"><span class="ic">🟠</span><div><b>Concentrazione clienti.</b> 5 clienti generano il 62% del fatturato: rischio dipendenza elevato.</div></div>
+          <div class="al wa"><span class="ic">🟠</span><div><b>Costi fornitori +14%.</b> Categoria "Materie prime" in forte crescita negli ultimi 3 mesi.</div></div>
+          <div class="al ok"><span class="ic">🟢</span><div><b>Margine in miglioramento.</b> Marginalità media salita al 40% grazie alla rinegoziazione con 2 fornitori.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rbox fu">
+      <div class="rt">📝 Report Panoramica</div>
+      <div class="rx">LUMIO — PANORAMICA AZIENDALE
+31/12/2025  ·  3 file analizzati
+──────────────────────────────────────────────────
+Fatturato:        € 487.213   (+12,4% vs 2024)
+Acquisti+costi:   € 291.858   (+8,1%)
+Margine lordo:    € 195.355   (40,1%)
+Salute:           78/100 — Buona
+
+PUNTI DI FORZA
+  • Crescita fatturato a doppia cifra
+  • Marginalità in miglioramento (+1,8 pt)
+
+DA TENERE D'OCCHIO
+  • Liquidità inferiore ai debiti a breve termine
+  • 62% del fatturato su 5 clienti
+  • Costi materie prime +14% in 3 mesi</div>
+    </div>
+  </div>
+
+  <!-- ══════ VENDITE VS ACQUISTI ══════ -->
+  <div class="view" data-v="svp">
+    <div class="vhead">
+      <div><h2>📊 Vendite vs Acquisti</h2><p>Confronto tra entrate e uscite mese per mese · 2025</p></div>
+    </div>
+
+    <div class="grid g3 fu" style="margin-bottom:14px">
+      <div class="kpi"><div class="l">📈 Vendite totali</div><div class="v" style="color:var(--mint-d)">€ 487.213</div><span class="t nu">vendite_2025.xlsx</span></div>
+      <div class="kpi"><div class="l">📉 Acquisti totali</div><div class="v" style="color:var(--red)">€ 213.408</div><span class="t nu">acquisti_2025.xlsx</span></div>
+      <div class="kpi"><div class="l">💰 Margine lordo</div><div class="v">€ 273.805</div><span class="t up">56,2% margine</span></div>
+    </div>
+
+    <div class="card fu" style="margin-bottom:14px">
+      <div class="ct">📈 Andamento mensile — Vendite vs Acquisti</div>
+      <div class="cs">Confronto mese per mese: entrate (verde) e uscite (rosso)</div>
+      <div class="bars" id="svp-bars"></div>
+      <div class="legend"><span><i style="background:#0DB27A"></i>Vendite</span><span><i style="background:#FCA5A5"></i>Acquisti</span></div>
+    </div>
+
+    <div class="grid g2 fu">
+      <div class="card">
+        <div class="ct">💰 Margine mensile</div><div class="cs">Differenza vendite − acquisti per ogni mese</div>
+        <div class="mbars" id="svp-margin"></div>
+      </div>
+      <div class="card">
+        <div class="ct">🏆 Top prodotti per fatturato</div><div class="cs">Dai dati vendite</div>
+        <div class="tlist">
+          <div class="ti"><span class="trk">1</span><div class="tw"><div class="tn">Modulo M-200 Pro</div><div class="tb-bar"><span style="width:100%;background:#0DB27A"></span></div></div><span class="tv">€ 84k</span></div>
+          <div class="ti"><span class="trk">2</span><div class="tw"><div class="tn">Kit di servizio A1</div><div class="tb-bar"><span style="width:63%;background:#0DB27A"></span></div></div><span class="tv">€ 53k</span></div>
+          <div class="ti"><span class="trk">3</span><div class="tw"><div class="tn">Componente C-14</div><div class="tb-bar"><span style="width:49%;background:#0DB27A"></span></div></div><span class="tv">€ 41k</span></div>
+          <div class="ti"><span class="trk">4</span><div class="tw"><div class="tn">Pacchetto Premium</div><div class="tb-bar"><span style="width:40%;background:#0DB27A"></span></div></div><span class="tv">€ 34k</span></div>
+          <div class="ti"><span class="trk">5</span><div class="tw"><div class="tn">Modulo M-110 Std</div><div class="tb-bar"><span style="width:33%;background:#0DB27A"></span></div></div><span class="tv">€ 27k</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rbox fu">
+      <div class="rt">📝 Report Vendite vs Acquisti</div>
+      <div class="rx">LUMIO — VENDITE VS ACQUISTI
+Generato il 31/12/2025
+──────────────────────────────────────────────────
+Vendite totali:    € 487.213
+Acquisti totali:   € 213.408
+Margine lordo:     € 273.805 (56,2%)
+
+Media mens. vendite:   € 40.601
+Media mens. acquisti:  € 17.784
+Margine medio/mese:    € 22.817
+
+Mese migliore:  Settembre (€ 68.200 vendite)
+Mese peggiore:  Febbraio (€ 38.100 vendite)</div>
+    </div>
+  </div>
+
+  <!-- ══════ SCADENZARIO ══════ -->
+  <div class="view" data-v="pay">
+    <div class="vhead">
+      <div><h2>💳 Scadenzario</h2><p>24 posizioni aperte · 31 dicembre 2025</p></div>
+    </div>
+
+    <div class="grid g2 fu" style="margin-bottom:14px">
+      <div class="kpi"><div class="l">💚 Da incassare (clienti)</div><div class="v" style="color:var(--mint-d)">€ 134.500</div><span class="t wn">⚠ Insoluti: € 28.300 (18 doc.)</span></div>
+      <div class="kpi"><div class="l">❤️ Da pagare (fornitori)</div><div class="v" style="color:var(--red)">€ 98.200</div><span class="t dn">⚠ Scaduti: € 12.400 (6 doc.)</span></div>
+    </div>
+
+    <div class="card fu" style="margin-bottom:14px">
+      <div class="ct">📅 Aging crediti — da incassare</div><div class="cs">Distribuzione per scadenza</div>
+      <div class="aging" style="margin-top:6px">
+        <div class="ag now"><div class="l">A scadere</div><div class="v">€ 84.900</div><div class="s">non ancora scaduti</div></div>
+        <div class="ag soon"><div class="l">0–30 gg</div><div class="v">€ 21.300</div><div class="s">scaduti di recente</div></div>
+        <div class="ag late"><div class="l">31–60 gg</div><div class="v">€ 16.800</div><div class="s">in ritardo</div></div>
+        <div class="ag crit"><div class="l">60+ gg</div><div class="v">€ 11.500</div><div class="s">a rischio insoluto</div></div>
+      </div>
+    </div>
+
+    <div class="card fu">
+      <div class="ct">📋 Posizioni aperte principali</div><div class="cs">Ordinate per importo · clienti e fornitori</div>
+      <div style="overflow-x:auto; margin-top:6px">
+        <table class="tbl">
+          <thead><tr><th>Documento</th><th>Controparte</th><th>Tipo</th><th class="r">Importo</th><th>Scadenza</th><th>Stato</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">FT-2025-0412</td><td>Officine Verdi S.p.A.</td><td>Cliente</td><td class="r">€ 32.400</td><td>15/01/2026</td><td><span class="pill ok">a scadere</span></td></tr>
+            <tr><td class="mono">FT-2025-0388</td><td>Logistica Ponte S.r.l.</td><td>Cliente</td><td class="r">€ 18.700</td><td>02/12/2025</td><td><span class="pill late">scaduto 29gg</span></td></tr>
+            <tr><td class="mono">ACQ-2025-211</td><td>Materie Prime Bortolotti</td><td>Fornitore</td><td class="r">€ 24.100</td><td>10/01/2026</td><td><span class="pill ok">a scadere</span></td></tr>
+            <tr><td class="mono">FT-2025-0357</td><td>Centro Sud Distribuzione</td><td>Cliente</td><td class="r">€ 14.200</td><td>20/11/2025</td><td><span class="pill late">scaduto 41gg</span></td></tr>
+            <tr><td class="mono">ACQ-2025-198</td><td>Logistica Sud</td><td>Fornitore</td><td class="r">€ 9.800</td><td>28/12/2025</td><td><span class="pill soon">scade in 3gg</span></td></tr>
+            <tr><td class="mono">FT-2025-0341</td><td>EdilNord Coop.</td><td>Cliente</td><td class="r">€ 11.500</td><td>05/10/2025</td><td><span class="pill late">scaduto 87gg</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="note fu">
+      <span class="ic">💡</span>
+      <p><b>Suggerimento Lumio:</b> hai € 28.300 di crediti insoluti, di cui € 11.500 oltre i 60 giorni. Un sollecito mirato sui 3 clienti scaduti recupererebbe quasi un terzo della liquidità mancante per coprire i debiti a breve.</p>
+    </div>
+  </div>
+
+  <!-- ══════ ANDAMENTO PREZZI ══════ -->
+  <div class="view" data-v="prod">
+    <div class="vhead">
+      <div><h2>📦 Andamento prezzi prodotti</h2><p>5 prodotti rilevati · prezzo unitario nel tempo (vendita e acquisto)</p></div>
+    </div>
+
+    <div class="grid g2 fu" style="margin-bottom:14px">
+      <div class="prod">
+        <div class="prod-h"><div class="prod-n">Modulo M-200 Pro</div><span class="prod-trend up">▲ +9,2%</span></div>
+        <div class="spark"><span style="height:40%"></span><span style="height:44%"></span><span style="height:42%"></span><span style="height:50%"></span><span style="height:55%"></span><span style="height:62%"></span></div>
+        <div class="prod-foot"><span class="a">Prezzo medio vendita</span><span class="b">€ 204,50</span></div>
+        <div class="prod-foot"><span class="a">Costo medio acquisto</span><span class="b">€ 121,00</span></div>
+        <div class="prod-foot"><span class="a">Margine unitario</span><span class="b" style="color:var(--mint-d)">€ 83,50 · 41%</span></div>
+      </div>
+      <div class="prod">
+        <div class="prod-h"><div class="prod-n">Componente C-14</div><span class="prod-trend dn">▼ −4,1%</span></div>
+        <div class="spark"><span style="height:62%"></span><span style="height:58%"></span><span style="height:55%"></span><span style="height:52%"></span><span style="height:50%"></span><span style="height:47%"></span></div>
+        <div class="prod-foot"><span class="a">Prezzo medio vendita</span><span class="b">€ 45,70</span></div>
+        <div class="prod-foot"><span class="a">Costo medio acquisto</span><span class="b">€ 31,20</span></div>
+        <div class="prod-foot"><span class="a">Margine unitario</span><span class="b" style="color:var(--mint-d)">€ 14,50 · 32%</span></div>
+      </div>
+      <div class="prod">
+        <div class="prod-h"><div class="prod-n">Kit di servizio A1</div><span class="prod-trend fl">≈ stabile</span></div>
+        <div class="spark"><span style="height:50%"></span><span style="height:51%"></span><span style="height:49%"></span><span style="height:50%"></span><span style="height:52%"></span><span style="height:51%"></span></div>
+        <div class="prod-foot"><span class="a">Prezzo medio vendita</span><span class="b">€ 165,80</span></div>
+        <div class="prod-foot"><span class="a">Costo medio acquisto</span><span class="b">€ 98,40</span></div>
+        <div class="prod-foot"><span class="a">Margine unitario</span><span class="b" style="color:var(--mint-d)">€ 67,40 · 41%</span></div>
+      </div>
+      <div class="prod">
+        <div class="prod-h"><div class="prod-n">Pacchetto Premium</div><span class="prod-trend up">▲ +6,8%</span></div>
+        <div class="spark"><span style="height:42%"></span><span style="height:45%"></span><span style="height:48%"></span><span style="height:50%"></span><span style="height:54%"></span><span style="height:58%"></span></div>
+        <div class="prod-foot"><span class="a">Prezzo medio vendita</span><span class="b">€ 380,00</span></div>
+        <div class="prod-foot"><span class="a">Costo medio acquisto</span><span class="b">€ 210,00</span></div>
+        <div class="prod-foot"><span class="a">Margine unitario</span><span class="b" style="color:var(--mint-d)">€ 170,00 · 45%</span></div>
+      </div>
+    </div>
+
+    <div class="card fu">
+      <div class="ct">⚠️ Segnalazioni sui prezzi</div><div class="cs">Variazioni che impattano il margine</div>
+      <div class="alist">
+        <div class="al wa"><span class="ic">🟠</span><div><b>Modulo M-200 Pro:</b> prezzo di acquisto salito del +9,2% in 6 mesi. Valuta una rinegoziazione o un ritocco del prezzo di vendita.</div></div>
+        <div class="al ok"><span class="ic">🟢</span><div><b>Componente C-14:</b> costo di acquisto in calo (−4,1%): opportunità di recuperare margine mantenendo il prezzo.</div></div>
+        <div class="al wa"><span class="ic">🟠</span><div><b>3 prodotti sotto la soglia del 20%</b> di margine: da rivedere il listino prezzi.</div></div>
+      </div>
+    </div>
+
+    <div class="rbox fu">
+      <div class="rt">📝 Report Andamento prezzi</div>
+      <div class="rx">LUMIO — ANDAMENTO PREZZI PRODOTTI
+31/12/2025  ·  5 prodotti rilevati
+──────────────────────────────────────────────────
+Modulo M-200 Pro    vend. € 204,50  acq. € 121,00  marg. 41%  ▲ +9,2%
+Componente C-14     vend. €  45,70  acq. €  31,20  marg. 32%  ▼ -4,1%
+Kit di servizio A1  vend. € 165,80  acq. €  98,40  marg. 41%  ≈ stabile
+Pacchetto Premium   vend. € 380,00  acq. € 210,00  marg. 45%  ▲ +6,8%
+Modulo M-110 Std    vend. €  95,60  acq. €  62,00  marg. 35%  ▲ +2,1%
+
+AZIONE CONSIGLIATA
+  • Rinegoziare costo M-200 Pro (+9,2%)
+  • Recuperare margine su C-14 (costo in calo)</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">
+  <p style="font-size:14px; color:var(--ink5)">Questi sono dati di esempio. <a href="index.html#prezzi">Richiedi la tua analisi →</a> per ricevere il report sui tuoi dati reali.</p>
+</div>
+
+<script>
+/* tab switching */
+const tabs = document.querySelectorAll('#tabs .tab');
+const views = document.querySelectorAll('.view');
+tabs.forEach(t=>t.addEventListener('click',()=>{
+  tabs.forEach(x=>x.classList.remove('act'));
+  t.classList.add('act');
+  const k = t.dataset.k;
+  const map = { over:'over', svp:'svp', pay:'pay', prod:'prod' };
+  views.forEach(v=>v.classList.toggle('on', v.dataset.v===k));
+  // re-trigger fade animations
+  document.querySelector('.view.on').querySelectorAll('.fu').forEach(el=>{
+    el.style.animation='none'; el.offsetHeight; el.style.animation='';
+  });
+  if(k==='svp') buildSvp();
+}));
+
+/* vendite vs acquisti bars */
+const sales = [38,38,41,46,44,52,50,58,68,61,59,72]; // €k
+const purch = [18,16,19,22,20,24,23,27,29,26,25,31];
+const months = ['G','F','M','A','M','G','L','A','S','O','N','D'];
+function buildSvp(){
+  const host = document.getElementById('svp-bars');
+  if(host.dataset.built) return;
+  const max = Math.max(...sales);
+  host.innerHTML = sales.map((s,i)=>`
+    <div class="col">
+      <div class="pair">
+        <span class="s grow" style="height:${s/max*100}%; animation-delay:${i*0.04}s"></span>
+        <span class="p grow" style="height:${purch[i]/max*100}%; animation-delay:${i*0.04+0.02}s"></span>
+      </div>
+      <div class="x">${months[i]}</div>
+    </div>`).join('');
+  const m = document.getElementById('svp-margin');
+  const marg = sales.map((s,i)=>s-purch[i]);
+  const mmax = Math.max(...marg);
+  m.innerHTML = marg.map((v,i)=>`<div class="col"><span class="grow" style="height:${v/mmax*100}%; animation-delay:${i*0.04}s"></span><div class="x">${months[i]}</div></div>`).join('');
+  host.dataset.built = '1';
+}
+buildSvp();
+</script>
+</body>
+</html>

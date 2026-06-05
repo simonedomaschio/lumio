@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Lumio — Area riservata · Richieste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --bg:#F5F7FA; --border:#E3E8EF; --border2:#C8D0DC;
+  --ink:#0D1117; --ink7:#1C2536; --ink5:#4A5568; --ink4:#718096; --ink3:#A0AEC0; --ink1:#EDF2F7;
+  --mint:#0DB27A; --mint-d:#098A5E; --mint-l:#E5F7F1; --mint-m:#A8E6D0;
+  --amber:#D97706; --amber-l:#FEF3C7; --red:#DC2626; --red-l:#FEE2E2; --blue:#2563EB; --blue-l:#EFF6FF;
+  --sh:0 1px 3px rgba(13,17,23,.05),0 4px 12px rgba(13,17,23,.04);
+}
+html,body { font-family:'DM Sans',system-ui,sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; line-height:1.5; }
+.mono { font-family:'DM Mono',monospace; }
+button { font-family:inherit; cursor:pointer; border:none; background:none; }
+a { color:inherit; }
+::selection { background:var(--mint); color:#fff; }
+
+.tb { background:var(--ink); color:#fff; }
+.tb-in { max-width:1180px; margin:0 auto; padding:14px 22px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
+.logo { display:flex; align-items:center; gap:9px; }
+.logo-name { font-size:18px; font-weight:800; letter-spacing:-.03em; }
+.logo-name .tag { font-size:11px; font-weight:600; color:var(--ink3); margin-left:8px; padding-left:10px; border-left:1px solid rgba(255,255,255,.18); }
+.btn { display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:700; padding:9px 16px; border-radius:10px; transition:all .15s; }
+.btn-mint { background:var(--mint); color:#fff; } .btn-mint:hover { background:var(--mint-d); }
+.btn-od { color:#fff; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.25); } .btn-od:hover { background:rgba(255,255,255,.08); }
+.btn-ghost { color:var(--ink5); box-shadow:inset 0 0 0 1px var(--border); background:#fff; } .btn-ghost:hover { box-shadow:inset 0 0 0 1px var(--border2); }
+.btn-sm { font-size:12px; padding:6px 11px; border-radius:8px; }
+
+/* gate */
+.gate { max-width:380px; margin:14vh auto; background:#fff; border-radius:20px; box-shadow:var(--sh); padding:34px 30px; text-align:center; }
+.gate .sun { width:44px; height:44px; margin:0 auto 16px; }
+.gate h1 { font-size:21px; font-weight:800; letter-spacing:-.02em; }
+.gate p { font-size:13.5px; color:var(--ink5); margin-top:6px; }
+.gate input { width:100%; font-family:inherit; font-size:15px; text-align:center; letter-spacing:.04em; background:var(--bg); border:1.5px solid var(--border); border-radius:12px; padding:13px; margin-top:20px; outline:none; }
+.gate input:focus { border-color:var(--mint); background:#fff; }
+.gate .err { color:var(--red); font-size:12.5px; margin-top:10px; min-height:16px; }
+
+.wrap { max-width:1180px; margin:0 auto; padding:28px 22px 80px; }
+.head { display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:22px; }
+.head h1 { font-size:26px; font-weight:800; letter-spacing:-.03em; }
+.head p { font-size:13.5px; color:var(--ink4); margin-top:3px; }
+.tools { display:flex; gap:8px; flex-wrap:wrap; }
+
+.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:22px; }
+@media(max-width:760px){ .stats { grid-template-columns:1fr 1fr; } }
+.stat { background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:var(--sh); }
+.stat .l { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--ink4); }
+.stat .v { font-size:28px; font-weight:800; letter-spacing:-.03em; margin-top:4px; }
+.stat .v.mint { color:var(--mint-d); } .stat .v.amber { color:var(--amber); }
+
+.filters { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+.fchip { font-size:12px; font-weight:700; padding:7px 14px; border-radius:9px; border:1.5px solid var(--border); background:#fff; color:var(--ink4); }
+.fchip.act { background:var(--ink); color:#fff; border-color:var(--ink); }
+.search { margin-left:auto; font-family:inherit; font-size:13px; background:#fff; border:1.5px solid var(--border); border-radius:9px; padding:8px 12px; outline:none; min-width:200px; }
+.search:focus { border-color:var(--mint); }
+
+.leads { display:flex; flex-direction:column; gap:12px; }
+.lead { background:#fff; border:1px solid var(--border); border-radius:16px; padding:18px 20px; box-shadow:var(--sh); }
+.lead.done { opacity:.62; }
+.lead-top { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+.lead-name { font-size:16px; font-weight:800; }
+.lead-sub { font-size:12.5px; color:var(--ink4); margin-top:1px; }
+.lead-pkg { display:inline-flex; align-items:center; font-size:11.5px; font-weight:700; padding:5px 11px; border-radius:100px; background:var(--mint-l); color:var(--mint-d); }
+.lead-meta { display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:14px; }
+.lead-field { font-size:13px; }
+.lead-field .k { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink4); display:block; margin-bottom:2px; }
+.lead-field a { color:var(--blue); font-weight:600; }
+.lead-msg { margin-top:14px; background:var(--bg); border-radius:11px; padding:12px 14px; font-size:13.5px; color:var(--ink7); line-height:1.55; }
+.lead-actions { display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+.pill { font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; text-transform:uppercase; letter-spacing:.05em; }
+.pill.nuovo { background:var(--blue-l); color:var(--blue); }
+.pill.contattato { background:var(--mint-l); color:var(--mint-d); }
+.empty { background:#fff; border:1.5px dashed var(--border2); border-radius:16px; padding:50px 24px; text-align:center; color:var(--ink4); }
+.empty .ic { font-size:34px; }
+.empty h3 { font-size:16px; font-weight:800; color:var(--ink); margin-top:10px; }
+.empty p { font-size:13.5px; margin-top:5px; }
+
+.note { background:var(--amber-l); border:1px solid #FDE68A; border-radius:12px; padding:13px 16px; font-size:12.5px; color:#78350F; line-height:1.55; margin-bottom:22px; }
+.note b { font-weight:700; }
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate" class="gate">
+  <svg class="sun" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="6" fill="#0DB27A"/><line x1="15" y1="2" x2="15" y2="5.5" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="15" y1="24.5" x2="15" y2="28" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="15" x2="5.5" y2="15" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="24.5" y1="15" x2="28" y2="15" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="5.64" y1="5.64" x2="8.18" y2="8.18" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/><line x1="21.82" y1="21.82" x2="24.36" y2="24.36" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/><line x1="24.36" y1="5.64" x2="21.82" y2="8.18" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/><line x1="8.18" y1="21.82" x2="5.64" y2="24.36" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/></svg>
+  <h1>Area riservata</h1>
+  <p>Accesso alle richieste ricevute.</p>
+  <input id="pwd" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')tryLogin()">
+  <div class="err" id="gate-err"></div>
+  <button class="btn btn-mint" style="width:100%; justify-content:center; margin-top:8px;" onclick="tryLogin()">Entra</button>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+  <div class="tb">
+    <div class="tb-in">
+      <a class="logo" href="index.html" style="color:#fff">
+        <svg width="26" height="26" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="6" fill="#0DB27A"/><line x1="15" y1="2" x2="15" y2="5.5" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="15" y1="24.5" x2="15" y2="28" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="15" x2="5.5" y2="15" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="24.5" y1="15" x2="28" y2="15" stroke="#0DB27A" stroke-width="2" stroke-linecap="round"/><line x1="5.64" y1="5.64" x2="8.18" y2="8.18" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/><line x1="21.82" y1="21.82" x2="24.36" y2="24.36" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/><line x1="24.36" y1="5.64" x2="21.82" y2="8.18" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/><line x1="8.18" y1="21.82" x2="5.64" y2="24.36" stroke="#0DB27A" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="logo-name">Lumio<span class="tag">Area riservata</span></span>
+      </a>
+      <div style="display:flex; gap:8px;">
+        <a class="btn btn-od" href="index.html">← Sito</a>
+        <button class="btn btn-od" onclick="logout()">Esci</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <h1>Richieste ricevute</h1>
+        <p>Le richieste inviate dal modulo di contatto del sito.</p>
+      </div>
+      <div class="tools">
+        <button class="btn btn-ghost" onclick="exportCSV()">⤓ Esporta CSV</button>
+        <button class="btn btn-ghost" onclick="refresh()">↻ Aggiorna</button>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>Notifiche attive:</b> ogni richiesta inviata dal sito arriva via email a <b>simonedomaschio@gmail.com</b> e può essere inoltrata su WhatsApp (340 6624943). Questa pagina conserva inoltre una copia delle richieste inviate da questo dispositivo. <b>Importante:</b> la primissima volta FormSubmit ti manda un'email di conferma da cliccare per attivare l'invio — controlla anche lo spam.
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="l">Totale richieste</div><div class="v" id="st-tot">0</div></div>
+      <div class="stat"><div class="l">Nuove da gestire</div><div class="v amber" id="st-new">0</div></div>
+      <div class="stat"><div class="l">Contattate</div><div class="v mint" id="st-done">0</div></div>
+      <div class="stat"><div class="l">Pacchetto più richiesto</div><div class="v" id="st-top" style="font-size:16px; margin-top:9px;">—</div></div>
+    </div>
+
+    <div class="filters">
+      <button class="fchip act" data-f="all" onclick="setFilter('all',this)">Tutte</button>
+      <button class="fchip" data-f="nuovo" onclick="setFilter('nuovo',this)">Nuove</button>
+      <button class="fchip" data-f="contattato" onclick="setFilter('contattato',this)">Contattate</button>
+      <input class="search" id="search" placeholder="Cerca nome, email, pacchetto…" oninput="render()">
+    </div>
+
+    <div class="leads" id="leads"></div>
+  </div>
+</div>
+
+<script>
+var ADMIN_PWD = 'lumio2026';
+var filter = 'all';
+
+function tryLogin(){
+  var v = document.getElementById('pwd').value;
+  if(v === ADMIN_PWD){
+    sessionStorage.setItem('lumio_admin','1');
+    showApp();
+  } else {
+    document.getElementById('gate-err').textContent = 'Password errata. Riprova.';
+  }
+}
+function logout(){ sessionStorage.removeItem('lumio_admin'); location.reload(); }
+function showApp(){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+  refresh();
+}
+if(sessionStorage.getItem('lumio_admin')==='1'){ showApp(); }
+
+function getLeads(){
+  try { return JSON.parse(localStorage.getItem('lumio_leads') || '[]'); }
+  catch(e){ return []; }
+}
+function saveLeads(l){ localStorage.setItem('lumio_leads', JSON.stringify(l)); }
+
+function setFilter(f, el){
+  filter = f;
+  document.querySelectorAll('.fchip').forEach(function(c){ c.classList.remove('act'); });
+  el.classList.add('act');
+  render();
+}
+
+function setStatus(id, status){
+  var leads = getLeads();
+  var i = leads.findIndex(function(l){ return l.id===id; });
+  if(i>=0){ leads[i].status = status; saveLeads(leads); refresh(); }
+}
+function delLead(id){
+  if(!confirm('Eliminare questa richiesta?')) return;
+  var leads = getLeads().filter(function(l){ return l.id!==id; });
+  saveLeads(leads); refresh();
+}
+
+function fmtDate(iso){
+  var d = new Date(iso);
+  return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}) + ' · ' + d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+}
+function esc(s){ return (s||'').replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+function refresh(){
+  var leads = getLeads();
+  document.getElementById('st-tot').textContent = leads.length;
+  document.getElementById('st-new').textContent = leads.filter(function(l){return l.status==='nuovo';}).length;
+  document.getElementById('st-done').textContent = leads.filter(function(l){return l.status==='contattato';}).length;
+  // top package
+  var counts = {};
+  leads.forEach(function(l){ counts[l.pkg] = (counts[l.pkg]||0)+1; });
+  var top = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; })[0];
+  document.getElementById('st-top').textContent = top ? top.split('—')[0].trim() : '—';
+  render();
+}
+
+function render(){
+  var leads = getLeads();
+  var q = (document.getElementById('search').value || '').toLowerCase();
+  var list = leads.filter(function(l){
+    if(filter!=='all' && l.status!==filter) return false;
+    if(q){
+      var hay = (l.name+' '+l.email+' '+l.pkg+' '+(l.company||'')+' '+(l.phone||'')).toLowerCase();
+      if(hay.indexOf(q)<0) return false;
+    }
+    return true;
+  });
+  var host = document.getElementById('leads');
+  if(list.length===0){
+    host.innerHTML = '<div class="empty"><div class="ic">📭</div><h3>Nessuna richiesta</h3><p>'+(leads.length===0?'Le richieste inviate dal modulo del sito appariranno qui.':'Nessun risultato per il filtro corrente.')+'</p></div>';
+    return;
+  }
+  host.innerHTML = list.map(function(l){
+    return '<div class="lead '+(l.status==='contattato'?'done':'')+'">'+
+      '<div class="lead-top">'+
+        '<div><div class="lead-name">'+esc(l.name)+' <span class="pill '+l.status+'">'+l.status+'</span></div>'+
+        '<div class="lead-sub">'+fmtDate(l.date)+(l.company?' · '+esc(l.company):'')+'</div></div>'+
+        '<span class="lead-pkg">'+esc(l.pkg)+'</span>'+
+      '</div>'+
+      '<div class="lead-meta">'+
+        '<div class="lead-field"><span class="k">Email</span><a href="mailto:'+esc(l.email)+'">'+esc(l.email)+'</a></div>'+
+        (l.phone?'<div class="lead-field"><span class="k">Telefono</span><a href="tel:'+esc(l.phone)+'">'+esc(l.phone)+'</a></div>':'')+
+        (l.company?'<div class="lead-field"><span class="k">Azienda</span>'+esc(l.company)+'</div>':'')+
+      '</div>'+
+      (l.msg?'<div class="lead-msg">'+esc(l.msg)+'</div>':'')+
+      '<div class="lead-actions">'+
+        (l.status==='nuovo'
+          ? '<button class="btn btn-mint btn-sm" onclick="setStatus(\''+l.id+'\',\'contattato\')">✓ Segna come contattato</button>'
+          : '<button class="btn btn-ghost btn-sm" onclick="setStatus(\''+l.id+'\',\'nuovo\')">↩ Riporta a nuovo</button>')+
+        '<a class="btn btn-ghost btn-sm" href="mailto:'+esc(l.email)+'?subject=Lumio — '+encodeURIComponent(l.pkg)+'">✉ Rispondi via email</a>'+
+        '<button class="btn btn-ghost btn-sm" onclick="delLead(\''+l.id+'\')" style="color:var(--red)">🗑 Elimina</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function exportCSV(){
+  var leads = getLeads();
+  if(leads.length===0){ alert('Nessuna richiesta da esportare.'); return; }
+  var rows = [['Data','Pacchetto','Nome','Azienda','Email','Telefono','Messaggio','Stato']];
+  leads.forEach(function(l){
+    rows.push([fmtDate(l.date), l.pkg, l.name, l.company||'', l.email, l.phone||'', (l.msg||'').replace(/\n/g,' '), l.status]);
+  });
+  var csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'lumio-richieste-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
